@@ -3,7 +3,13 @@
 This driver is a basic implementation to interface SSD1306 OLED Display with CH592F MCU over I2C protocol.
 
 A Cube is rendedered on the screen after the Test is complete. The cube's render is bounced indefinately over the edges of the display.
- 
+
+ ## Demo
+
+OLED Test followed by Bouncing Cube-
+
+https://github.com/user-attachments/assets/55bf6b5a-3785-45b9-87ac-11023e2fadab
+
 
 ## Features:
 - Plot line between 2 points
