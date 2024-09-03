@@ -11,6 +11,7 @@ encoding//StdPeriphDriver/CH59x_i2c.c=GBK
 encoding//StdPeriphDriver/CH59x_lcd.c=GBK
 encoding//StdPeriphDriver/CH59x_pwr.c=GBK
 encoding//StdPeriphDriver/CH59x_sys.c=GBK
+encoding//StdPeriphDriver/CH59x_uart0.c=GBK
 encoding//StdPeriphDriver/CH59x_usbhostClass.c=GBK
 encoding//StdPeriphDriver/inc/CH592SFR.h=GBK
 encoding//StdPeriphDriver/inc/CH59x_adc.h=GBK
