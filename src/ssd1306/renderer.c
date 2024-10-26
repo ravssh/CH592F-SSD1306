@@ -24,6 +24,7 @@ static int projected[8][2] = {0};
 static float vertices[8][3] = {0.0};
 
 static void I2C_WriteCommand(uint8_t command) {
+    while (I2C_GetFlagStatus(I2C_FLAG_BUSY) != RESET);
     I2C_GenerateSTART(ENABLE);
     while (!I2C_CheckEvent(I2C_EVENT_MASTER_MODE_SELECT));
     I2C_Send7bitAddress(OLED_I2C_ADDR << 1, I2C_Direction_Transmitter);
@@ -49,8 +50,10 @@ static void I2C_WriteData(uint8_t data) {
 
 int OLED_Init(void) {
     if ((!buffer) && !(buffer = (uint8_t *)malloc(OLED_WIDTH * ((OLED_HEIGHT + 7) / 8)))) {
-        return 1;
+        return 1; // Memory allocation failed
     }
+    
+    memset(buffer, 0x00, OLED_WIDTH * ((OLED_HEIGHT + 7) / 8)); // Clear buffer
 
     uint8_t vccstate = BOARD_POWER;
     uint8_t contrast = 0x8F;
@@ -61,46 +64,46 @@ int OLED_Init(void) {
     I2C_WriteCommand(0x80);         // Default setting
     I2C_WriteCommand(0xA8);         // Set Multiplex Ratio
     I2C_WriteCommand(OLED_HEIGHT - 1);
-
     I2C_WriteCommand(0xD3);         // Set Display Offset
     I2C_WriteCommand(0x00);         // No offset
-    I2C_WriteCommand(0x40 | 0x00 ); // Set Display Start Line
+    I2C_WriteCommand(0x40 | 0x00);  // Set Display Start Line
     I2C_WriteCommand(0x8D);         // Set Charge Pump Setting
     I2C_WriteCommand((vccstate == 0x01) ? 0x10 : 0x14); // Enable Charge Pump
 
-    I2C_WriteCommand(0x20);         // Set Memory Addressing Mode
-    I2C_WriteCommand(0x00);         // Page Addressing Mode
     I2C_WriteCommand(0xA0 | 0x1);   // Set Segment Re-map
     I2C_WriteCommand(0xC8);         // Set COM Output Scan Direction
 
     if ((OLED_WIDTH == 128) && (OLED_HEIGHT == 32)) {
-       comPins = 0x02;
-       contrast = 0x8F;
-     } else if ((OLED_WIDTH == 128) && (OLED_HEIGHT == 64)) {
-       comPins = 0x12;
-       contrast = (vccstate == 0x01) ? 0x9F : 0xCF;
-     } else if ((OLED_WIDTH == 96) && (OLED_HEIGHT == 16)) {
-       comPins = 0x2;
-       contrast = (vccstate == 0x01) ? 0x10 : 0xAF;
-     } else {
-       // Any other resolution
-     }
+        comPins = 0x02;
+        contrast = 0x8F;
+    } else if ((OLED_WIDTH == 128) && (OLED_HEIGHT == 64)) {
+        comPins = 0x12;
+        contrast = (vccstate == 0x01) ? 0x9F : 0xCF;
+    } else if ((OLED_WIDTH == 96) && (OLED_HEIGHT == 16)) {
+        comPins = 0x2;
+        contrast = (vccstate == 0x01) ? 0x10 : 0xAF;
+    }
 
     I2C_WriteCommand(0xDA);         // Set COM Pins Hardware Configuration
     I2C_WriteCommand(comPins);
     I2C_WriteCommand(0x81);         // Contrast Control
     I2C_WriteCommand(contrast);
-
     I2C_WriteCommand(0xD9);         // Set Pre-charge Period
     I2C_WriteCommand((vccstate == 0x01) ? 0x22 : 0xF1);
     I2C_WriteCommand(0xDB);         // Set VCOMH De-select Level
     I2C_WriteCommand(0x40);
+    
     I2C_WriteCommand(0xA4);         // Entire Display ON
-    I2C_WriteCommand(0xA6);         // Set Normal Display
-    I2C_WriteCommand(0x2E);         // Deactivate Scroll
     I2C_WriteCommand(0xAF);         // Display ON
-    return 0;
+    
+    I2C_WriteCommand(0x20);         // Set Memory Addressing Mode
+    I2C_WriteCommand(0x00);         // Page Addressing Mode
+    
+    I2C_WriteCommand(0xA6);         // Set Normal Display
+
+    return 0; // Success
 }
+
 
 void OLED_UpdateScreen(void) {
     for (uint8_t page = 0; page < (OLED_HEIGHT / 8); page++) {
@@ -112,6 +115,7 @@ void OLED_UpdateScreen(void) {
             I2C_WriteData(buffer[page * OLED_WIDTH + col]);
         }
     }
+    DelayMs(1);
 }
 
 void OLED_Clear(void) {

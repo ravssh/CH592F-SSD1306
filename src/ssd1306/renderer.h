@@ -6,11 +6,14 @@ extern "C"
 {
 #endif
 
-
 #include <stdlib.h>
 #include <stdbool.h>
 #include <math.h>
 #include "CH59x_common.h"
+
+#ifndef M_PI
+#define M_PI (3.14159265358979323846)
+#endif
 
 // Change if needed
 #define OLED_I2C_ADDR 0x3C  // SSD1306 Address
